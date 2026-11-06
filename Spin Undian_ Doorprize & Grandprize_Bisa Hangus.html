@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spin Undian: Doorprize & Grandprize</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light;
+--bg:#f6f4ef;--card:#fff;--text:#1d1b16;--muted:#6f6a5e;--line:#e4dfd2;--accent:#0f766e;--accent-text:#fff;--slot:#fbfaf6;--warn:#b91c1c}
+:root[data-mode=grand]{--accent:#b45309}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#141311;--card:#1f1d19;--text:#f3efe4;--muted:#a49e8e;--line:#34312a;--slot:#181713;--accent:#2dd4bf;--accent-text:#042f2c;--warn:#f87171}
+:root:not([data-theme="light"])[data-mode=grand]{--accent:#fbbf24;--accent-text:#2b1a02}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#141311;--card:#1f1d19;--text:#f3efe4;--muted:#a49e8e;--line:#34312a;--slot:#181713;--accent:#2dd4bf;--accent-text:#042f2c;--warn:#f87171}
+:root[data-theme="dark"][data-mode=grand]{--accent:#fbbf24;--accent-text:#2b1a02}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+.wrap{max-width:960px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:clamp(1.5rem,4vw,2.1rem);margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:var(--muted);margin:0 0 20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px}
+.drop{border:2px dashed var(--line);border-radius:14px;padding:22px;text-align:center;cursor:pointer;color:var(--muted)}
+.drop:hover,.drop.over{border-color:var(--accent);color:var(--text)}
+.drop b{color:var(--text)}
+.tabs{display:flex;gap:8px;margin-bottom:16px}
+.tab{flex:1;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--text);font:inherit;font-weight:600;cursor:pointer}
+.tab.on{background:var(--accent);color:var(--accent-text);border-color:var(--accent)}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:end}
+label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:4px}
+input[type=text],input[type=number]{font:inherit;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--slot);color:var(--text);width:100%}
+.f{flex:1;min-width:140px}.f.s{flex:0 0 110px;min-width:90px}
+.chk{display:flex;gap:8px;align-items:center;font-size:.9rem;color:var(--muted);margin-top:12px}
+.stage{margin:16px 0}.gg{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:12px}.gh{font-weight:700;color:var(--accent);margin:8px 0 6px}
+.crow{display:flex;gap:8px;margin-bottom:8px;align-items:center}.crow .nm{flex:1;min-width:0}.crow .ct{width:84px;flex:none}.x{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:10px;width:40px;height:40px;cursor:pointer;font:inherit;flex:none}
+.slot{background:var(--slot);border:2px solid var(--line);border-radius:14px;padding:22px 12px;text-align:center;min-height:104px;display:flex;flex-direction:column;justify-content:center}
+.slot .n{font-size:clamp(1.2rem,3.5vw,1.7rem);font-weight:800;word-break:break-word}
+.slot .d{font-size:.85rem;color:var(--muted);min-height:1.2em}
+.slot.roll .n{opacity:.6;filter:blur(.6px)}
+.slot.done{border-color:var(--accent);animation:pop .5s ease}
+.slot.done .n{color:var(--accent)}
+@keyframes pop{0%{transform:scale(.92)}60%{transform:scale(1.05)}100%{transform:scale(1)}}
+.btn{font:inherit;font-weight:700;border:0;border-radius:12px;padding:14px 26px;background:var(--accent);color:var(--accent-text);cursor:pointer;font-size:1.05rem}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.g{background:transparent;color:var(--text);border:1px solid var(--line);font-size:.9rem;padding:9px 14px;font-weight:600}
+.btn.s{padding:5px 10px;font-size:.78rem;border-radius:9px;flex:none}
+.btn.w{color:var(--warn);border-color:var(--warn)}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.stat{color:var(--muted);font-size:.9rem}
+.stat b{color:var(--text)}
+.wl{list-style:none;padding:0;margin:12px 0 0}
+.wl li{display:flex;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.wl li.sh{border-top:0;padding-top:18px;color:var(--accent)}
+.wl li.sh.gh2{color:var(--warn)}
+.wl li.gone .nmx{text-decoration:line-through;color:var(--muted)}
+.wl .no{color:var(--muted);width:2ch;text-align:right}
+.wl .pz{margin-left:auto;font-size:.85rem;color:var(--accent);font-weight:600;text-align:right}
+.wl li.gone .pz{color:var(--warn)}
+.empty{color:var(--muted);padding:8px 0}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:.9rem;z-index:20;max-width:90vw;display:none}
+.scroll{overflow-x:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🎁 Spin Undian</h1>
+  <p class="sub">Unggah daftar peserta dari Excel, lalu putar untuk Doorprize dan Grandprize.</p>
+
+  <div class="card">
+    <div class="drop" id="drop"><b>Klik atau seret file Excel ke sini</b><br>.xlsx, .xls, atau .csv</div>
+    <input type="file" id="file" accept=".xlsx,.xls,.csv" hidden>
+    <div class="bar" style="margin-top:12px"><span class="stat" id="stat">Belum ada data peserta.</span><button class="btn g" id="clearAll">Hapus semua data</button></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab on" data-m="door">Doorprize</button>
+    <button class="tab" data-m="grand">Grandprize</button>
+  </div>
+
+  <div class="card">
+    <label>Kategori hadiah dan jumlah pemenang (semua kategori diputar bersamaan)</label>
+    <div id="cats"></div>
+    <button class="btn g" id="addcat">+ Tambah kategori hadiah</button>
+
+    <div class="stage" id="stage"><div class="gg"><div class="slot"><div class="n">?</div><div class="d">Siap diputar</div></div></div></div>
+    <div class="bar"><button class="btn" id="spin" disabled>🎰 SPIN</button><span class="stat" id="left"></span></div>
+  </div>
+
+  <div class="card">
+    <div class="bar"><strong id="wtitle">Daftar pemenang Doorprize</strong>
+      <span><button class="btn g" id="dl">⬇ Unduh Excel (Doorprize + Grandprize)</button> <button class="btn g" id="copy">Salin untuk Excel</button> <button class="btn g" id="reset">Reset tab ini</button></span></div>
+    <p class="stat" style="margin:8px 0 0">Jika pemenang tidak hadir, klik “Tidak hadir”: hadiahnya hangus, orangnya tidak ikut diundi lagi, lalu klik “Spin ulang”.</p>
+    <ul class="wl" id="wl"></ul>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+let S={people:[],win:{door:[],grand:[]},absent:[],mode:'door',allow:false,rows:{door:[{name:'',count:1}],grand:[{name:'',count:1}]}};
+let busy=false;
+const KEY='spin-undian-v1';
+function toast(m){const t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',3500)}
+function arm(b,t){if(b.dataset.a){delete b.dataset.a;b.textContent=b.dataset.t;return true}b.dataset.a='1';b.dataset.t=b.textContent;b.textContent=t;setTimeout(()=>{if(b.dataset.a){delete b.dataset.a;b.textContent=b.dataset.t}},3000);return false}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function load(){try{const r=localStorage.getItem(KEY);if(r){const o=JSON.parse(r);if(o&&o.people){S=Object.assign(S,o);S.allow=false;if(!Array.isArray(S.absent))S.absent=[]}}}catch(e){}}
+const ESC=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function parseSheet(buf){
+  const wb=XLSX.read(buf,{type:'array'});
+  const ws=wb.Sheets[wb.SheetNames[0]];
+  const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+  if(!rows.length)return [];
+  let head=rows[0].map(x=>String(x).trim());
+  let ni=head.findIndex(h=>/^(nama|name|peserta)/i.test(h));
+  const hasHead=ni>=0||head.some(h=>/^(id|divisi|dept|unit|no|kategori|category|jenis)/i.test(h));
+  if(ni<0)ni=0;
+  const body=hasHead?rows.slice(1):rows;
+  let ci=head.findIndex(h=>/^(kategori|category|jenis|status|tipe|type|kode|partner|id|nik|nip|badge|nrp)/i.test(h));
+  if(ci<0){for(let c=0;c<head.length;c++){if(c===ni)continue;const vs=body.map(r=>String(r[c]??'').trim()).filter(Boolean);if(vs.length&&vs.every(v=>/^(p|1)/i.test(v))){ci=c;break}}}
+  const si=head.findIndex((h,i)=>i!==ni&&i!==ci&&h!=='');
+  const out=[];
+  body.forEach((r,i)=>{
+    const name=String(r[ni]??'').trim();
+    if(!name)return;
+    let sub='';
+    if(hasHead&&si>=0)sub=String(r[si]??'').trim();
+    else if(!hasHead&&r.length>1)sub=String(r[ni===0?1:0]??'').trim();
+    let cat='both';
+    if(ci>=0){const v=String(r[ci]??'').trim().toLowerCase();if(v[0]==='p')cat='door';else if(v[0]==='1')cat='both';else{const g=/grand/.test(v),d=/door/.test(v);if(g&&!d)cat='grand';else if(d&&!g)cat='door'}}
+    out.push({id:i+':'+name,name,sub,cat,nrp:ci>=0?String(r[ci]??'').trim():''});
+  });
+  return out;
+}
+async function handleFile(f){
+  if(!f)return;
+  try{
+    const buf=await f.arrayBuffer();
+    const p=parseSheet(buf);
+    if(!p.length){toast('Tidak ada nama yang terbaca dari file ini.');return}
+    S.people=p;S.win={door:[],grand:[]};S.absent=[];save();render();
+  }catch(e){toast('Gagal membaca file: '+e.message)}
+}
+function eligible(){
+  const m=S.mode,w=S.win;
+  const ban=new Set(w.grand.map(x=>x.id));
+  S.absent.forEach(x=>ban.add(x.id));
+  if(!(m==='grand'&&S.allow))w.door.forEach(x=>ban.add(x.id));
+  if(m==='door')w.grand.forEach(x=>ban.add(x.id));
+  return S.people.filter(p=>{const c=p.cat||'both';return !ban.has(p.id)&&(c==='both'||c===m)});
+}
+function render(){
+  document.documentElement.dataset.mode=S.mode;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.m===S.mode));
+
+  const el=eligible();
+  const won=new Set(S.win.door.concat(S.win.grand,S.absent).map(x=>x.id));const rem=S.people.filter(p=>!won.has(p.id)).length;
+  $('stat').innerHTML=S.people.length?'<b>'+rem+'</b> peserta tersisa (dari '+S.people.length+' peserta).':'Belum ada data peserta.';
+  $('left').innerHTML='';
+  $('spin').disabled=busy||el.length===0;
+  renderCats();
+  const det=w=>(w.nrp||w.sub?' <span class="stat">· '+ESC([w.nrp,w.sub].filter(Boolean).join(' · '))+'</span>':'');
+  const item=k=>(w,i)=>'<li><span class="no">'+(i+1)+'</span><span><strong>'+ESC(w.name)+'</strong>'+det(w)+'</span>'+(w.cat?'<span class="pz">'+ESC(w.cat)+'</span>':'<span class="pz"></span>')+'<button class="btn g s w" data-abs="'+k+':'+i+'">Tidak hadir</button></li>';
+  const sec=(t,k)=>{const L=S.win[k];return '<li class="sh"><strong>'+t+' ('+L.length+')</strong></li>'+(L.length?L.map(item(k)).join(''):'<li class="empty">Belum ada pemenang.</li>')};
+  $('wtitle').textContent='Daftar pemenang ('+(S.win.door.length+S.win.grand.length)+')';
+  let h=sec('Doorprize','door')+sec('Grandprize','grand');
+  if(S.absent.length){
+    h+='<li class="sh gh2"><strong>Hangus / tidak hadir ('+S.absent.length+')</strong></li>'+S.absent.map((w,i)=>'<li class="gone"><span class="no">'+(i+1)+'</span><span class="nmx"><strong>'+ESC(w.name)+'</strong>'+det(w)+'</span><span class="pz">Hangus · '+(w.mode==='grand'?'Grandprize':'Doorprize')+(w.cat?' · '+ESC(w.cat):'')+'</span>'+(w.redo?'<span class="stat">sudah diundi ulang</span>':'<button class="btn g s" data-redo="'+i+'">🎰 Spin ulang</button>')+'</li>').join('');
+  }
+  $('wl').innerHTML=h;
+}
+function pick(arr,n){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
+  return a.slice(0,n);
+}
+function rows(){const r=S.rows&&S.rows[S.mode];return r&&r.length?r:[{name:'',count:1}]}
+function renderCats(){
+  const R=rows();S.rows=S.rows||{door:[],grand:[]};S.rows[S.mode]=R;
+  $('cats').innerHTML=R.map((r,i)=>'<div class="crow"><input type="text" class="nm" data-i="'+i+'" placeholder="Kategori hadiah (mis. Bag)" value="'+ESC(r.name)+'"><input type="number" class="ct" data-i="'+i+'" min="1" max="50" value="'+(parseInt(r.count)||1)+'" title="Jumlah pemenang">'+(R.length>1?'<button class="x" data-x="'+i+'" title="Hapus kategori">✕</button>':'')+'</div>').join('');
+  $('cats').querySelectorAll('.nm').forEach(e=>e.oninput=()=>{R[+e.dataset.i].name=e.value;save()});
+  $('cats').querySelectorAll('.ct').forEach(e=>e.oninput=()=>{R[+e.dataset.i].count=e.value;save()});
+  $('cats').querySelectorAll('.x').forEach(e=>e.onclick=()=>{if(busy)return;R.splice(+e.dataset.x,1);save();renderCats()});
+}
+$('addcat').onclick=()=>{if(busy)return;rows().push({name:'',count:1});save();renderCats()};
+function spin(custom){
+  if(busy)return;
+  const el=eligible();
+  if(!el.length)return;
+  const pool=pick(el,el.length);
+  const groups=[];let k=0;
+  (custom||rows()).forEach(r=>{
+    const n=Math.max(1,Math.min(50,parseInt(r.count)||1));
+    const ws=pool.slice(k,k+n);k+=n;
+    if(ws.length)groups.push({cat:(r.name||'').trim(),ws});
+  });
+  const flat=[];groups.forEach(g=>g.ws.forEach(w=>flat.push({w,cat:g.cat})));
+  busy=true;$('spin').disabled=true;
+  const stage=$('stage');
+  stage.innerHTML=groups.map(g=>(g.cat?'<div class="gh">'+ESC(g.cat)+'</div>':'')+'<div class="gg">'+g.ws.map(()=>'<div class="slot roll"><div class="n">…</div><div class="d">&nbsp;</div></div>').join('')+'</div>').join('');
+  stage.scrollIntoView({behavior:'smooth',block:'center'});
+  const slots=[...stage.querySelectorAll('.slot')];
+  const stopped=slots.map(()=>false);
+  const iv=setInterval(()=>{
+    slots.forEach((s,i)=>{if(stopped[i])return;const r=el[Math.floor(Math.random()*el.length)];s.firstChild.textContent=r.name})
+  },70);
+  slots.forEach((s,i)=>{
+    setTimeout(()=>{
+      stopped[i]=true;
+      const f=flat[i];
+      s.classList.remove('roll');s.classList.add('done');
+      s.firstChild.textContent=f.w.name;
+      s.lastChild.textContent=[f.w.nrp,f.w.sub].filter(Boolean).join(' · ');
+      S.win[S.mode].push(Object.assign({},f.w,{cat:f.cat}));
+      save();
+      if(i===slots.length-1){clearInterval(iv);busy=false;render()}
+    },2200+i*450);
+  });
+}
+function copyText(){
+  const ls=['No\tJenis\tKategori Hadiah\tNama\tNRP\tDivisi'];let n=0;
+  [['Doorprize',S.win.door],['Grandprize',S.win.grand]].forEach(([k,L])=>L.forEach(w=>ls.push([++n,k,w.cat||'',w.name,w.nrp||'',w.sub||''].join('\t'))));
+  if(ls.length<2){toast('Belum ada pemenang.');return}
+  const t=ls.join('\n');
+  const done=()=>{$('copy').textContent='Tersalin ✓';setTimeout(()=>$('copy').textContent='Salin untuk Excel',1800)};
+  const fb=()=>{const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done()}catch(e){}ta.remove()};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(done,fb);else fb();
+}
+const drop=$('drop'),file=$('file');
+drop.onclick=()=>file.click();
+file.onchange=()=>handleFile(file.files[0]);
+['dragover','dragenter'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.add('over')}));
+['dragleave','drop'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.remove('over')}));
+drop.addEventListener('drop',ev=>handleFile(ev.dataTransfer.files[0]));
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{if(busy)return;S.mode=t.dataset.m;save();$('stage').innerHTML='<div class="gg"><div class="slot"><div class="n">?</div><div class="d">Siap diputar</div></div></div>';render()});
+
+$('wl').onclick=ev=>{
+  const b=ev.target.closest('button');if(!b||busy)return;
+  if(b.dataset.abs){
+    if(!arm(b,'Yakin? Klik lagi'))return;
+    const [k,i]=b.dataset.abs.split(':');
+    const w=S.win[k].splice(+i,1)[0];
+    if(w){S.absent.push(Object.assign({},w,{mode:k,redo:false}));save();render();toast(w.name+' tidak hadir. Hadiah hangus, silakan spin ulang.')}
+  }else if(b.dataset.redo!==undefined){
+    const e=S.absent[+b.dataset.redo];
+    if(!e||e.redo)return;
+    S.mode=e.mode;
+    if(!eligible().length){render();toast('Tidak ada peserta tersisa untuk diundi ulang.');return}
+    e.redo=true;save();render();
+    spin([{name:e.cat||'',count:1}]);
+  }
+};
+$('spin').onclick=()=>spin();
+$('copy').onclick=copyText;
+$('reset').onclick=()=>{if(busy)return;if(arm($('reset'),'Yakin? Klik lagi')){S.win[S.mode]=[];S.absent=S.absent.filter(x=>x.mode!==S.mode);save();render()}};
+$('clearAll').onclick=()=>{if(busy)return;if(arm($('clearAll'),'Yakin? Klik lagi')){S={people:[],win:{door:[],grand:[]},absent:[],mode:'door',allow:false,rows:{door:[{name:'',count:1}],grand:[{name:'',count:1}]}};save();render()}};
+let DL=null;
+async function dlXlsx(){
+  const rows=[['No','Jenis','Kategori Hadiah','Nama','NRP','Divisi']];let n=0;
+  [['Doorprize',S.win.door],['Grandprize',S.win.grand]].forEach(([k,L])=>L.forEach(w=>rows.push([++n,k,w.cat||'',w.name,w.nrp||'',w.sub||''])));
+  if(rows.length<2){toast('Belum ada pemenang.');return}
+  const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:5},{wch:12},{wch:18},{wch:28},{wch:14},{wch:20}];
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Pemenang');
+  if(S.absent.length){const ar=[['No','Jenis','Kategori Hadiah','Nama','NRP','Divisi','Status']];S.absent.forEach((w,i)=>ar.push([i+1,w.mode==='grand'?'Grandprize':'Doorprize',w.cat||'',w.name,w.nrp||'',w.sub||'','Hangus (tidak hadir)']));const w2=XLSX.utils.aoa_to_sheet(ar);w2['!cols']=[{wch:5},{wch:12},{wch:18},{wch:28},{wch:14},{wch:20},{wch:22}];XLSX.utils.book_append_sheet(wb,w2,'Hangus')}
+  if(!DL){try{DL=await claude.use('downloads')}catch(e){}}
+  if(!DL){copyText();toast('Unduh file tidak tersedia di tampilan ini. Data sudah disalin, tinggal tempel (paste) ke Excel.');return}
+  const buf=XLSX.write(wb,{type:'array',bookType:'xlsx'});
+  try{await DL.save({filename:'daftar-pemenang.xlsx',data:buf})}catch(e){if(!e||e.code!=='declined')toast('Gagal mengunduh: '+((e&&(e.message||e.code))||''))}
+}
+$('dl').onclick=dlXlsx;
+try{if(window.claude&&claude.use)claude.use('downloads').then(d=>{if(d){DL=d;$('dl').hidden=false}}).catch(()=>{})}catch(e){}
+load();render();
+</script>
+</body>
+</html>
