@@ -64,7 +64,7 @@ input[type=text],input[type=number]{font:inherit;padding:10px 12px;border-radius
 </head>
 <body>
 <div class="wrap">
-  <h1>🎁 Spin Undian</h1>
+  <h1>🎁 Spin Undian <small id="net" style="color:#a49e8e;font-size:.6em" title="Menghubungkan…">●</small></h1>
   <p class="sub pn">Unggah daftar peserta dari Excel, lalu putar untuk Doorprize dan Grandprize.</p>
 
   <div class="card pn">
@@ -105,7 +105,45 @@ let busy=false;
 const KEY='spin-undian-v1';
 function toast(m){const t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',3500)}
 function arm(b,t){if(b.dataset.a){delete b.dataset.a;b.textContent=b.dataset.t;return true}b.dataset.a='1';b.dataset.t=b.textContent;b.textContent=t;setTimeout(()=>{if(b.dataset.a){delete b.dataset.a;b.textContent=b.dataset.t}},3000);return false}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const SB='https://amhtjcfnibifisuqitki.supabase.co',HK={apikey:'sb_publishable_yXpy9BSl9_RXN11T8_n15w_JX8u1oc5'};
+let lastSeen='',dirty=false,pushT=null;
+function net(ok){const e=$('net');if(!e)return;e.style.color=ok?'#22c55e':'#ef4444';e.title=ok?'Tersambung ke server':'Tidak tersambung ke server (data tetap tersimpan di browser ini)'}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}schedulePush()}
+function schedulePush(){dirty=true;clearTimeout(pushT);pushT=setTimeout(push,400)}
+async function push(){
+  const {mode,allow,...data}=S;const ts=new Date().toISOString();lastSeen=ts;
+  try{
+    const r=await fetch(SB+'/rest/v1/undian_state?on_conflict=id',{method:'POST',headers:Object.assign({'Content-Type':'application/json',Prefer:'resolution=merge-duplicates,return=minimal'},HK),body:JSON.stringify({id:1,data,updated_at:ts})});
+    if(!r.ok)throw new Error(r.status);
+    dirty=false;net(true);
+  }catch(e){net(false);clearTimeout(pushT);pushT=setTimeout(push,3000)}
+}
+function applyRemote(row){
+  const before=rk();const m=S.mode;
+  S=Object.assign(S,row.data);S.mode=m;S.allow=false;if(!Array.isArray(S.absent))S.absent=[];
+  lastSeen=row.updated_at;
+  try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
+  render();if(rk()!==before)preview();
+}
+async function poll(){
+  if(busy||dirty)return;
+  try{
+    const r=await fetch(SB+'/rest/v1/undian_state?id=eq.1&select=updated_at',{headers:HK});
+    if(!r.ok)throw 0;const a=await r.json();net(true);
+    if(!a.length||Date.parse(a[0].updated_at)===Date.parse(lastSeen))return;
+    const r2=await fetch(SB+'/rest/v1/undian_state?id=eq.1&select=data,updated_at',{headers:HK});
+    if(!r2.ok)throw 0;const b=await r2.json();
+    if(b.length&&!busy&&!dirty)applyRemote(b[0]);
+  }catch(e){net(false)}
+}
+async function initSync(){
+  try{
+    const r=await fetch(SB+'/rest/v1/undian_state?id=eq.1&select=data,updated_at',{headers:HK});
+    if(!r.ok)throw 0;const a=await r.json();net(true);
+    if(a.length)applyRemote(a[0]);else if(S.people.length)push();
+  }catch(e){net(false)}
+  setInterval(poll,2000);
+}
 function load(){try{const r=localStorage.getItem(KEY);if(r){const o=JSON.parse(r);if(o&&o.people){S=Object.assign(S,o);S.allow=false;if(!Array.isArray(S.absent))S.absent=[]}}}catch(e){}}
 const ESC=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
@@ -287,11 +325,7 @@ window.addEventListener('hashchange',pov);pov();
 $('gopov').onclick=()=>{location.hash='spin'};
 document.addEventListener('keydown',ev=>{if(ev.altKey&&(ev.key==='p'||ev.key==='P')){location.hash=location.hash==='#panitia'?'spin':'panitia'}});
 const rk=()=>JSON.stringify([S.mode,S.rows&&S.rows[S.mode]]);
-window.addEventListener('storage',ev=>{
-  if(ev.key!==KEY||busy||!ev.newValue)return;
-  try{const o=JSON.parse(ev.newValue);if(!o||!o.people)return;const before=rk();S=Object.assign(S,o);S.allow=false;if(!Array.isArray(S.absent))S.absent=[];render();if(rk()!==before)preview()}catch(e){}
-});
-load();render();preview();
+load();render();preview();initSync();
 </script>
 </body>
 </html>
