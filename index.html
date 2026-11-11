@@ -285,7 +285,8 @@ drop.addEventListener('drop',ev=>handleFile(ev.dataTransfer.files[0]));
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{if(busy)return;S.mode=t.dataset.m;save();render();preview()});
 
 $('wl').onclick=ev=>{
-  const b=ev.target.closest('button');if(!b||busy)return;
+  const b=ev.target.closest('button');if(!b)return;
+  if(busy){toast('Putaran masih berjalan. Klik STOP sampai semua kotak berhenti dulu.');return}
   if(b.dataset.abs){
     if(!arm(b,'Yakin? Klik lagi'))return;
     const [k,i]=b.dataset.abs.split(':');
@@ -294,10 +295,11 @@ $('wl').onclick=ev=>{
   }else if(b.dataset.redo!==undefined){
     const e=S.absent[+b.dataset.redo];
     if(!e||e.redo)return;
-    S.mode=e.mode;
-    if(!eligible().length){render();toast('Tidak ada peserta tersisa untuk diundi ulang.');return}
+    const pm=S.mode;S.mode=e.mode;
+    if(!eligible().length){S.mode=pm;render();toast('Tidak ada peserta yang bisa diundi ulang (semua sudah menang, hangus, atau bukan untuk kategori ini).');return}
     e.redo=true;save();render();
     spin([{name:e.cat||'',count:1}]);
+    toast('Spin ulang dimulai. Klik STOP untuk menghentikan kotaknya.');
   }
 };
 $('spin').onclick=()=>busy?stopOne():spin();
